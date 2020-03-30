@@ -1,0 +1,81 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# NIfTI
+
+NifTI (Neuroimaging Informatics Tehcnology Image)
+-Standardized representation of images
+-Most commonly used tpy eof analytic file
+-Developed to facilitate cross-platform, cross-software interpretability
+-3-dimensional array: stacking individual slices on top of each other
+-DICOM: one sheet of paper; NIfTI: stack of papers
+
+## From DICOM to NIfTI
+
+-DICOM to NIFTI using the `dicom2nifti` function in the `oro.dicom` package
+-The `nifti` object becomes an R object
+-After saving a file to a `nifti` file it can be used without R
+
+Let's read all DICOM images:
+
+```{r}
+library(oro.dicom)
+all_slices_T1 = readDICOM("Neurohacking_data/BRAINIX/DICOM/T1")
+dim(all_slices_T1$img[[11]])
+hdr = all_slices_T1$hdr[[11]]
+hdr[hdr$name == "PixelSpacing", "value"]
+
+
+```
+
+Now lets's convert them to NIFTI:
+```{r}
+nii_T1 = dicom2nifti(all_slices_T1)
+d = dim(nii_T1); d; class(nii_T1)
+``` 
+
+And plot one slice:
+```{r}
+# Plot the 11th slice
+image(1:d[1], 1:d[2], nii_T1[,,11], col=gray(0:64/64), xlab="", ylab="")
+```
+
+## Write and Read NIfTI files
+
+- Use the `writeNIfTI, readNIfTI` functions in the `oro.nifti` package
+- Default for `writeNIfTI` is to save the compressed NIfTI files
+
+```{r}
+library(oro.nifti)
+dir_name = "Neurohacking_data/BRAINIX/NIfTI/"
+fname = "Output_3D_File"
+writeNIfTI(nim=nii_T1, file = paste0(dir_name, fname))
+```
+
+And check that the file si there after saving
+```{r}
+list.files(dir_name, pattern = fname)
+```
+
+Now lets read a different file:
+
+```{r}
+list.files(dir_name, pattern="T") #Check that file is in directory
+nii_T2=readNIfTI(paste0(dir_name,"T2.nii.gz"), reorient=FALSE)
+dim(nii_T2)
+```
+
+## Compressed Image Files
+
+-A non-compressed file can be obtained using the argument `gzipped=FALSE` in the function `writeNIfTI`
+
+
+
+
+
+
