@@ -1,0 +1,134 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+# DICOM 
+DICOM (Digital Imaging and Communications in Medicine) format
+
+- Standardized representation of images
+- Formats of files from scanner to hospital PACS (picture archiving and communication system)
+- Two components: image data (in pixles) and header (metadata)
+
+## readDICOM Output
+
+The pixel data in a DICOM file is a matrix
+
+One DICOM file = one "slice of the brain
+
+The `oro.dicom` package enables reading DICOM files in R. 
+
+
+Each slice is stored as a list.
+
+```{r}
+library(oro.dicom)
+slice = readDICOM("Neurohacking_data/BRAINIX/DICOM/FLAIR/IM-0001-0011.dcm")
+suppressMessages(class(slice))
+```
+
+This contains two lists: `hdr` and `img`
+
+```{r}
+names(slice)
+class(slice$hdr)
+class(slice$img)
+```
+
+Each element of `hdr` is a data.frame and each element of `img`  is a matrix
+
+```{r}
+class(slice$hdr[[1]])
+class(slice$img[[1]])
+dim(slice$img[[1]])
+```
+
+## DICOM Images
+
+We can look at the image in R.
+
+```{r}
+d = dim(t(slice$img[[1]]))
+image(1:d[1], 1:d[2], t(slice$img[[1]]), col=gray(0:64/64))
+```
+
+For analysis we want to look at the numbers in the matrix, not the image in the grayscale.
+
+### Working with the numbers
+
+```{r}
+slice$img[[1]][101:105, 121:125]
+```
+
+And we can plot the data as usual using histograms
+```{r}
+hist(slice$img[[1]][,], #all elements
+breaks=50, xlab="FLAIR",
+prob=T, col = rgb(0, 0, 1, 1/4),
+main="")
+```
+
+## DICOM Header Information
+Now let's look at the header.
+
+```{r}
+hdr = slice$hdr[[1]]
+str(hdr)
+```
+
+Each row of the dataframe has a name:
+
+```{r}
+hdr$name
+```
+
+Let's look at the `"PixelSpacing"` for this images, which represents the resolution of the image. 
+
+```{r}
+hdr[hdr$name == 'PixelSpacing', 'value']
+```
+
+We can also look at the Flip Angle used while collecting the image.
+```{r}
+hdr[hdr$name == 'FlipAngle', ]
+```
+
+## Loading Multiple DICOM Files
+
+For analysis, we will need to read in all the slices. Specifying a directory instead of a file name in `readDICOM` will load all images in that directory as a single object.
+```{r}
+all_slices_T1 = readDICOM("Neurohacking_data/BRAINIX/DICOM/T1/")
+```
+
+Examining the dimensions of the first slice shows that the T1 image has a higher resolution than the FLAIR image. Thus this is a bigger
+```{r}
+dim(all_slices_T1$img[[1]])
+hdr = all_slices_T1$hdr[[1]]
+hdr[hdr$name == "PixelSpacing", "value"]
+```
+
+## Summary 
+-DICOM files contain a lot of information
+-Image data are stored as collection of 2D slice files
+-Different sequences can have different resolutions
+-Data and metadata can be accessed in R
+-Contains protected health data
+-Structure is cumbersome for 3D analysis
+-A genuine 3D format is needed:: NIfTI
+
+
+
+
+
+
+
+
+
+
+
+
+
+
