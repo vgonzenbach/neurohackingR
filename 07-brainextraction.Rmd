@@ -5,7 +5,7 @@ output: html_document
 # Skull Stripping with FSL's Brain Extraction Tool (BET)
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
 ```
 
 ## Loading file
@@ -19,9 +19,9 @@ if(!have.fsl()){
 
 #Check file paths for data downloaded from
 library(oro.nifti)
-fpath = "Neurohacking_data/kirby21/visit_1/113/"
-fname = "fast-113-01-MPRAGE.nii.gz"
-fast_img = readNIfTI(paste0(fpath,fname), reorient=FALSE)
+fpath = "Neurohacking_data/kirby21/visit_1/113"
+fname = "fast-113-01-MPRAGE"
+fast_img = readNIfTI(file.path(fpath,fname), reorient=FALSE)
 ```
 
 ## Running BET
@@ -69,3 +69,9 @@ orthographic(bet_fast2)
 ```
 
 The results have improved, removing much of the lower non-brain sections. However, we can see the results are not perfect so it's important to visually inspect each image at each phase of the processing pipeline.
+
+# Write NIfTI
+```{r}
+fname = paste0("bet2-",fname)
+suppressMessages(oro.nifti::writeNIfTI(bet_fast2, file.path(fpath, fname)))
+```

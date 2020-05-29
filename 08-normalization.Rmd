@@ -1,0 +1,40 @@
+---
+title: "08-normalization"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, cache = TRUE)
+```
+
+# Normalization to a template aka Registration
+
+## Linear Registration
+
+FSL's FMRIB's Linear Image Registration Tool (FLIRT) implements rigid and affine transformation to the the image
+
+### Read files
+```{r}
+temp_dir = "Neurohacking_data/Template"
+template_img = oro.nifti::readNIfTI(file.path(temp_dir, "MNI152_T1_1mm_brain.nii.gz"), reorient = FALSE)
+
+fpath = "Neurohacking_data/kirby21/visit_1/113"
+fname = "bet2-fast-113-01-MPRAGE"
+bet2_fast_img = oro.nifti::readNIfTI(file.path(fpath, fname), reorient = FALSE)
+orthographic(bet2_fast_img)
+```
+
+
+### Running FLIRT for rigid transformation
+
+```{r}
+register_img = fslr::flirt(infile = bet2_fast_img, 
+                     reffile = template_img, 
+                     dof = 6, #for rigid transformation
+                     retimg = TRUE)
+orthographic(template_img)
+orthographic(register_img)
+```
+
+
+
