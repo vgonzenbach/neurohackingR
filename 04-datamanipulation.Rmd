@@ -1,0 +1,75 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Data Manipulation
+
+This lecture covers:
+- Masking
+- Operations
+
+## Download data from GitHub repository
+
+The code below downloads (1) the brain data and (2) the mask for this data.
+```{r}
+"This code chunk has been adapted from from https://github.com/muschellij2/Neurohacking/blob/master/week2/Basic%20Data%20Manipulation.Rmd"
+
+url = "https://raw.githubusercontent.com/muschellij2/Neurohacking/master/Basic_Data_Manipulations/Kirby21/SUBJ0001-01-MPRAGE.nii.gz"
+fname = "SUBJ0001-01-MPRAGE.nii.gz"
+fpath = file.path("Neurohacking_data/kirby21", fname)
+download.file(url, fpath, mode="wb")
+
+maskurl = "https://raw.githubusercontent.com/muschellij2/Neurohacking/master/Basic_Data_Manipulations/Kirby21/SUBJ0001_mask.nii.gz"
+maskfname = "SUBJ0001_mask.nii.gz"
+maskfpath = file.path(getwd(), maskfname)
+download.file(maskurl, maskfpath, mode="wb")# NIfTI is binaryfile format
+
+library(oro.nifti)
+T1 = readNIfTI(fpath,reorient=FALSE)
+mask = readNIfTI(maskfpath, reorient=FALSE) 
+```
+
+## Visualization
+
+This brain was collected with a bigger FOV than the previous scans. Thus a lot of body parts other than brain are shown. 
+```{r}
+orthographic(T1)
+```
+
+
+```{r}
+orthographic(mask)
+```
+
+## Masking
+
+```{r}
+marked.T1 = T1*mask
+orthographic(masked.T1)
+```
+
+##  Substraction
+
+Load the follow up T1 scan from the Girthub repository
+
+```{r}
+url = "https://raw.githubusercontent.com/muschellij2/Neurohacking/master/Basic_Data_Manipulations/Kirby21/SUBJ0001-02-MPRAGE.nii.gz"
+fname = "SUBJ0001-02-MPRAGE.nii.gz"
+fpath = file.path("Neurohacking_data/kirby21", fname)
+download.file(url, fpath, mode="wb")
+
+T1.follow  = readNIfTI(fpath, reorient = FALSE)
+
+substract.T1 = T1.follow - T1
+min(substract.T1)
+max(substract.T1)
+```
+
+```{r}
+orthographic(substract.T1)
+```
+

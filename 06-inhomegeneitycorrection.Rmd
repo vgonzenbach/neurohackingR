@@ -1,0 +1,111 @@
+---
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#set fsl path before running fslr in RStudio
+library(fslr)
+if(!have.fsl()){
+  options(fsl.path = '/usr/local/bin')
+} 
+
+#Check file paths for data downloaded from
+library(oro.nifti)
+fpath = "Neurohacking_data/kirby21/visit_1/113/"
+fname = "113-01-MPRAGE"
+nim = readNIfTI(paste0(fpath,fname), reorient=FALSE)
+```
+
+#Some statistics using FSL
+
+```{r}
+mean(nim)
+
+# can call fsl within r on the 'nim' img
+fslstats(nim, opts="-m")
+
+# can also provide a filepath instead of r object
+fslstats(fpath, opts="-m")
+fslstats.help()
+```
+# Perform inhomogeneity correction
+
+```{r}
+# fsl_biascorrect calls FAST from FSL
+fast_img =fslr::fsl_biascorrect(nim, retimg=TRUE)
+```
+#Plot difference between images in R
+
+we can use colors to visually inspect the difference between two images. In this case, the bias-corrected image was substracted from the original image and the resulting intensities (i.e. areare colored based on their sign. Quantiles are used to provide to derive the color palette. 
+
+```{r}
+----
+
+sub_bias = niftiarr(nim, nim-fast_img)
+
+#quantile the difference image using these breaks
+q = quantile(sub_bias[sub_bias != 0], probs = seq(0,1,0.1))
+
+#install.packages("scales")
+library(scales)
+
+#get a gradient palette to map onto divergence between images
+fcol = scales::div_gradient_pal(low="blue", mid="yellow", high="red")
+
+ortho2(nim, sub_bias,
+       col.y=alpha(fcol(seq(0,1, length = 10))), #color for second arg
+       ybreaks= q,
+       ycolorbar= TRUE,
+       text = paste0("Original  Image Minus N4", "\n Bias-Corrected Image")
+)
+```
+
+# Plotting histograms of intensities for original and bias-corrected images
+
+```{r}
+
+# choose a subset of slices to be plotted
+slices = c(2,6,10,14,18)
+
+# for each slice number save that slice from the original and bias-corrected images into an array
+vals = lapply(slices, function(x){
+  cbind(img = c(nim[,,x]),
+        fast = c(fast_img[,,x]),
+        slice = x)
+})
+
+# row bind all elements of the vals list to get a data.frame
+vals = do.call("rbind", vals)
+vals = data.frame(vals)
+
+# filter out values below 0
+vals = vals[vals$img > 0 & vals$fast > 0,]
+
+# Change column names
+colnames(vals)[1:2] = c("OriginalValue", "Bias-Corrected Value")
+v = reshape::melt(vals, id.vars = "slice")
+
+library(dplyr)
+library(ggplot2)
+g = v %>% ggplot(aes(x = value,
+                     col = factor(slice))) +
+  geom_line(stat = "density") +
+  facet_wrap(~variable) +
+  scale_colour_discrete(name = "Slice #")
+
+g
+```
+
+After bias field correction the intensity curves line up better across slice. Also, the relative intensities are affected such that the highest intensity. 
+
+# Write NIfTi
+
+```{r}
+fname = paste0("fast-",fname)
+suppressMessages(oro.nifti::writeNIfTI(fast_img, paste0(fpath, fname)))
+```
+
