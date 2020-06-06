@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Lecture 7 Skull Stripping with FSL’s Brain Extraction Tool (BET) | 08-normalization</title>
+  <meta name="description" content="Lecture notes from John Hopkins’ Neurohacking in R Coursera course" />
+  <meta name="generator" content="bookdown 0.18 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Lecture 7 Skull Stripping with FSL’s Brain Extraction Tool (BET) | 08-normalization" />
+  <meta property="og:type" content="book" />
+  
+  
+  <meta property="og:description" content="Lecture notes from John Hopkins’ Neurohacking in R Coursera course" />
+  <meta name="github-repo" content="vgonzenbach/neurohackingR" />
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Lecture 7 Skull Stripping with FSL’s Brain Extraction Tool (BET) | 08-normalization" />
+  
+  <meta name="twitter:description" content="Lecture notes from John Hopkins’ Neurohacking in R Coursera course" />
+  
+
+<meta name="author" content="Virgilio Gonzenbach" />
+
+
+<meta name="date" content="2020-06-05" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="inhomogeneitybias-field-correction.html"/>
+<link rel="next" href="registration-to-a-template-spatial-normalization.html"/>
+<script src="libs/header-attrs-2.1/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Lecture Notes from the Neurohacking in R Coursera course by Johns Hopkins</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="" data-path="index.html"><a href="index.html"><i class="fa fa-check"></i>Introduction</a></li>
+<li class="chapter" data-level="1" data-path="dicom.html"><a href="dicom.html"><i class="fa fa-check"></i><b>1</b> DICOM</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="dicom.html"><a href="dicom.html#readdicom-output"><i class="fa fa-check"></i><b>1.1</b> readDICOM Output</a></li>
+<li class="chapter" data-level="1.2" data-path="dicom.html"><a href="dicom.html#dicom-images"><i class="fa fa-check"></i><b>1.2</b> DICOM Images</a>
+<ul>
+<li class="chapter" data-level="1.2.1" data-path="dicom.html"><a href="dicom.html#working-with-the-numbers"><i class="fa fa-check"></i><b>1.2.1</b> Working with the numbers</a></li>
+</ul></li>
+<li class="chapter" data-level="1.3" data-path="dicom.html"><a href="dicom.html#dicom-header-information"><i class="fa fa-check"></i><b>1.3</b> DICOM Header Information</a></li>
+<li class="chapter" data-level="1.4" data-path="dicom.html"><a href="dicom.html#loading-multiple-dicom-files"><i class="fa fa-check"></i><b>1.4</b> Loading Multiple DICOM Files</a></li>
+<li class="chapter" data-level="1.5" data-path="dicom.html"><a href="dicom.html#summary"><i class="fa fa-check"></i><b>1.5</b> Summary</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="nifti.html"><a href="nifti.html"><i class="fa fa-check"></i><b>2</b> NIfTI</a>
+<ul>
+<li class="chapter" data-level="2.1" data-path="nifti.html"><a href="nifti.html#from-dicom-to-nifti"><i class="fa fa-check"></i><b>2.1</b> From DICOM to NIfTI</a></li>
+<li class="chapter" data-level="2.2" data-path="nifti.html"><a href="nifti.html#write-and-read-nifti-files"><i class="fa fa-check"></i><b>2.2</b> Write and Read NIfTI files</a></li>
+<li class="chapter" data-level="2.3" data-path="nifti.html"><a href="nifti.html#compressed-image-files"><i class="fa fa-check"></i><b>2.3</b> Compressed Image Files</a></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="basic-visualization.html"><a href="basic-visualization.html"><i class="fa fa-check"></i><b>3</b> Basic Visualization</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="basic-visualization.html"><a href="basic-visualization.html#read-nifti"><i class="fa fa-check"></i><b>3.1</b> Read NIfTI</a></li>
+<li class="chapter" data-level="3.2" data-path="basic-visualization.html"><a href="basic-visualization.html#visualizing-slices"><i class="fa fa-check"></i><b>3.2</b> Visualizing Slices</a></li>
+<li class="chapter" data-level="3.3" data-path="basic-visualization.html"><a href="basic-visualization.html#exploratory-histogram-of-intensities"><i class="fa fa-check"></i><b>3.3</b> Exploratory histogram of intensities</a></li>
+<li class="chapter" data-level="3.4" data-path="basic-visualization.html"><a href="basic-visualization.html#back-mapping"><i class="fa fa-check"></i><b>3.4</b> Back mapping</a></li>
+</ul></li>
+<li class="chapter" data-level="4" data-path="data-manipulation.html"><a href="data-manipulation.html"><i class="fa fa-check"></i><b>4</b> Data Manipulation</a>
+<ul>
+<li class="chapter" data-level="4.1" data-path="data-manipulation.html"><a href="data-manipulation.html#open-data"><i class="fa fa-check"></i><b>4.1</b> Open data</a></li>
+<li class="chapter" data-level="4.2" data-path="data-manipulation.html"><a href="data-manipulation.html#visualization"><i class="fa fa-check"></i><b>4.2</b> Visualization</a></li>
+<li class="chapter" data-level="4.3" data-path="data-manipulation.html"><a href="data-manipulation.html#masking"><i class="fa fa-check"></i><b>4.3</b> Masking</a></li>
+<li class="chapter" data-level="4.4" data-path="data-manipulation.html"><a href="data-manipulation.html#substraction"><i class="fa fa-check"></i><b>4.4</b> Substraction</a></li>
+</ul></li>
+<li class="chapter" data-level="5" data-path="transformation.html"><a href="transformation.html"><i class="fa fa-check"></i><b>5</b> Transformation</a>
+<ul>
+<li class="chapter" data-level="5.1" data-path="transformation.html"><a href="transformation.html#visualizing-after-transformations"><i class="fa fa-check"></i><b>5.1</b> Visualizing after transformations</a></li>
+<li class="chapter" data-level="5.2" data-path="transformation.html"><a href="transformation.html#smoothing"><i class="fa fa-check"></i><b>5.2</b> Smoothing</a></li>
+</ul></li>
+<li class="chapter" data-level="6" data-path="inhomogeneitybias-field-correction.html"><a href="inhomogeneitybias-field-correction.html"><i class="fa fa-check"></i><b>6</b> Inhomogeneity/Bias Field Correction</a>
+<ul>
+<li class="chapter" data-level="6.1" data-path="inhomogeneitybias-field-correction.html"><a href="inhomogeneitybias-field-correction.html#some-statistics-using-fsl"><i class="fa fa-check"></i><b>6.1</b> Some statistics using FSL</a></li>
+<li class="chapter" data-level="6.2" data-path="inhomogeneitybias-field-correction.html"><a href="inhomogeneitybias-field-correction.html#perform-inhomogeneity-correction"><i class="fa fa-check"></i><b>6.2</b> Perform inhomogeneity correction</a></li>
+<li class="chapter" data-level="6.3" data-path="inhomogeneitybias-field-correction.html"><a href="inhomogeneitybias-field-correction.html#plot-difference-between-images-in-r"><i class="fa fa-check"></i><b>6.3</b> Plot difference between images in R</a></li>
+<li class="chapter" data-level="6.4" data-path="inhomogeneitybias-field-correction.html"><a href="inhomogeneitybias-field-correction.html#plotting-histograms-of-intensities-for-original-and-bias-corrected-images"><i class="fa fa-check"></i><b>6.4</b> Plotting histograms of intensities for original and bias-corrected images</a></li>
+<li class="chapter" data-level="6.5" data-path="inhomogeneitybias-field-correction.html"><a href="inhomogeneitybias-field-correction.html#write-nifti"><i class="fa fa-check"></i><b>6.5</b> Write NIfTi</a></li>
+</ul></li>
+<li class="chapter" data-level="7" data-path="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><i class="fa fa-check"></i><b>7</b> Skull Stripping with FSL’s Brain Extraction Tool (BET)</a>
+<ul>
+<li class="chapter" data-level="7.1" data-path="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#loading-file"><i class="fa fa-check"></i><b>7.1</b> Loading file</a></li>
+<li class="chapter" data-level="7.2" data-path="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#running-bet"><i class="fa fa-check"></i><b>7.2</b> Running BET</a></li>
+<li class="chapter" data-level="7.3" data-path="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#visualizing-first-past"><i class="fa fa-check"></i><b>7.3</b> Visualizing first past</a></li>
+<li class="chapter" data-level="7.4" data-path="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#improving-brain-extraction"><i class="fa fa-check"></i><b>7.4</b> Improving Brain Extraction</a></li>
+<li class="chapter" data-level="7.5" data-path="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#visualizing-first-and-second-pass"><i class="fa fa-check"></i><b>7.5</b> Visualizing first and second pass</a></li>
+<li class="chapter" data-level="7.6" data-path="skull-stripping-with-fsls-brain-extraction-tool-bet.html"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#write-nifti-1"><i class="fa fa-check"></i><b>7.6</b> Write NIfTI</a></li>
+</ul></li>
+<li class="chapter" data-level="8" data-path="registration-to-a-template-spatial-normalization.html"><a href="registration-to-a-template-spatial-normalization.html"><i class="fa fa-check"></i><b>8</b> Registration to a template (Spatial Normalization)</a>
+<ul>
+<li class="chapter" data-level="8.1" data-path="registration-to-a-template-spatial-normalization.html"><a href="registration-to-a-template-spatial-normalization.html#linear-registration"><i class="fa fa-check"></i><b>8.1</b> Linear Registration</a>
+<ul>
+<li class="chapter" data-level="8.1.1" data-path="registration-to-a-template-spatial-normalization.html"><a href="registration-to-a-template-spatial-normalization.html#read-files"><i class="fa fa-check"></i><b>8.1.1</b> Read files</a></li>
+<li class="chapter" data-level="8.1.2" data-path="registration-to-a-template-spatial-normalization.html"><a href="registration-to-a-template-spatial-normalization.html#running-flirt-for-rigid-transformation"><i class="fa fa-check"></i><b>8.1.2</b> Running FLIRT for rigid transformation</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">08-normalization</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="skull-stripping-with-fsls-brain-extraction-tool-bet" class="section level1" number="7">
+<h1><span class="header-section-number">Lecture 7</span> Skull Stripping with FSL’s Brain Extraction Tool (BET)</h1>
+<div id="loading-file" class="section level2" number="7.1">
+<h2><span class="header-section-number">7.1</span> Loading file</h2>
+<div class="sourceCode" id="cb119"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb119-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-1"></a><span class="co">#set fsl path before running fslr in RStudio</span></span>
+<span id="cb119-2"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-2"></a><span class="kw">library</span>(fslr)</span>
+<span id="cb119-3"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-3"></a><span class="cf">if</span>(<span class="op">!</span><span class="kw">have.fsl</span>()){</span>
+<span id="cb119-4"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-4"></a>  <span class="kw">options</span>(<span class="dt">fsl.path =</span> <span class="st">&#39;/usr/local/bin&#39;</span>)</span>
+<span id="cb119-5"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-5"></a>} </span>
+<span id="cb119-6"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-6"></a></span>
+<span id="cb119-7"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-7"></a><span class="co">#Check file paths for data downloaded from</span></span>
+<span id="cb119-8"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-8"></a><span class="kw">library</span>(oro.nifti)</span>
+<span id="cb119-9"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-9"></a>fpath =<span class="st"> &quot;Neurohacking_data/kirby21/visit_1/113&quot;</span></span>
+<span id="cb119-10"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-10"></a>fname =<span class="st"> &quot;fast-113-01-MPRAGE&quot;</span></span>
+<span id="cb119-11"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb119-11"></a>fast_img =<span class="st"> </span><span class="kw">readNIfTI</span>(<span class="kw">file.path</span>(fpath,fname), <span class="dt">reorient=</span><span class="ot">FALSE</span>)</span></code></pre></div>
+</div>
+<div id="running-bet" class="section level2" number="7.2">
+<h2><span class="header-section-number">7.2</span> Running BET</h2>
+<div class="sourceCode" id="cb120"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb120-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb120-1"></a>bet_fast =<span class="st"> </span>fslr<span class="op">::</span><span class="kw">fslbet</span>(<span class="dt">infile=</span>fast_img, <span class="dt">retimg =</span> <span class="ot">TRUE</span>)</span></code></pre></div>
+<pre><code>## FSLDIR=&#39;/usr/local/fsl&#39;; PATH=${FSLDIR}/bin:${PATH};export PATH FSLDIR; sh &quot;${FSLDIR}/etc/fslconf/fsl.sh&quot;; FSLOUTPUTTYPE=NIFTI_GZ; export FSLOUTPUTTYPE; ${FSLDIR}/bin/bet2 &quot;/private/var/folders/wk/jzm8xd01507b9nx7qmycj7700000gn/T/RtmpmusoTp/file2c314bb9976d.nii.gz&quot; &quot;/var/folders/wk/jzm8xd01507b9nx7qmycj7700000gn/T//RtmpmusoTp/file2c311d9f6564&quot;</code></pre>
+</div>
+<div id="visualizing-first-past" class="section level2" number="7.3">
+<h2><span class="header-section-number">7.3</span> Visualizing first past</h2>
+<p>To visualize the effects of the brain extraction on the original, the <code>orthographic</code> may be used twice by passing (1) the image returned by BET, (2) the original image overlaid by a mask. To produce the mask, follow the code below.</p>
+<div class="sourceCode" id="cb122"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb122-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-1"></a><span class="co"># create an array of 1s with same dimensions as the skull-stripped image</span></span>
+<span id="cb122-2"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-2"></a>bet_fast_mask =<span class="st"> </span><span class="kw">niftiarr</span>(bet_fast, <span class="dv">1</span>)</span>
+<span id="cb122-3"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-3"></a></span>
+<span id="cb122-4"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-4"></a><span class="co"># set all non-brain voxel to NA</span></span>
+<span id="cb122-5"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-5"></a>bet_fast_mask[<span class="op">!</span>(bet_fast <span class="op">&gt;</span><span class="st"> </span><span class="dv">0</span>)] &lt;-<span class="st"> </span><span class="ot">NA</span></span>
+<span id="cb122-6"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-6"></a></span>
+<span id="cb122-7"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-7"></a><span class="co"># plot</span></span>
+<span id="cb122-8"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb122-8"></a><span class="kw">orthographic</span>(bet_fast)</span></code></pre></div>
+<p><img src="07-brainextraction_files/figure-html/unnamed-chunk-3-1.png" width="672" /></p>
+<div class="sourceCode" id="cb123"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb123-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb123-1"></a><span class="kw">orthographic</span>(fast_img, bet_fast_mask)</span></code></pre></div>
+<p><img src="07-brainextraction_files/figure-html/unnamed-chunk-3-2.png" width="672" /></p>
+<p>The results are not great since a lot of non-brain areas get included.</p>
+</div>
+<div id="improving-brain-extraction" class="section level2" number="7.4">
+<h2><span class="header-section-number">7.4</span> Improving Brain Extraction</h2>
+<p>To improve upon the results, a second pass can be done taking into account the center of gravity.</p>
+<div class="sourceCode" id="cb124"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb124-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-1"></a><span class="co"># use the cog function on the skull-stripped image</span></span>
+<span id="cb124-2"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-2"></a>cog =<span class="st"> </span><span class="kw">cog</span>(bet_fast, <span class="dt">ceil =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb124-3"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-3"></a></span>
+<span id="cb124-4"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-4"></a><span class="co">#prepare a string to be passed to opts parameter of fslbet</span></span>
+<span id="cb124-5"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-5"></a>cog =<span class="st"> </span><span class="kw">paste</span>(<span class="st">&quot;-c&quot;</span>, <span class="kw">paste</span>(cog, <span class="dt">collapse =</span> <span class="st">&quot; &quot;</span>))</span>
+<span id="cb124-6"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-6"></a></span>
+<span id="cb124-7"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-7"></a><span class="co"># run BET on the bias-corrected img using the center of gravity to get cleaner results</span></span>
+<span id="cb124-8"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb124-8"></a>bet_fast2 =<span class="st"> </span><span class="kw">fslbet</span>(<span class="dt">infile =</span> fast_img, <span class="dt">retimg =</span> <span class="ot">TRUE</span>, <span class="dt">opts =</span> cog)</span></code></pre></div>
+<pre><code>## FSLDIR=&#39;/usr/local/fsl&#39;; PATH=${FSLDIR}/bin:${PATH};export PATH FSLDIR; sh &quot;${FSLDIR}/etc/fslconf/fsl.sh&quot;; FSLOUTPUTTYPE=NIFTI_GZ; export FSLOUTPUTTYPE; ${FSLDIR}/bin/bet2 &quot;/private/var/folders/wk/jzm8xd01507b9nx7qmycj7700000gn/T/RtmpmusoTp/file2c314582822.nii.gz&quot; &quot;/var/folders/wk/jzm8xd01507b9nx7qmycj7700000gn/T//RtmpmusoTp/file2c313a31728f&quot; -c 88 140 129</code></pre>
+</div>
+<div id="visualizing-first-and-second-pass" class="section level2" number="7.5">
+<h2><span class="header-section-number">7.5</span> Visualizing first and second pass</h2>
+<div class="sourceCode" id="cb126"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb126-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb126-1"></a><span class="kw">orthographic</span>(bet_fast)</span></code></pre></div>
+<p><img src="07-brainextraction_files/figure-html/unnamed-chunk-5-1.png" width="672" /></p>
+<div class="sourceCode" id="cb127"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb127-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb127-1"></a><span class="kw">orthographic</span>(bet_fast2)</span></code></pre></div>
+<p><img src="07-brainextraction_files/figure-html/unnamed-chunk-5-2.png" width="672" /></p>
+<p>The results have improved, removing much of the lower non-brain sections. However, we can see the results are not perfect so it’s important to visually inspect each image at each phase of the processing pipeline.</p>
+</div>
+<div id="write-nifti-1" class="section level2" number="7.6">
+<h2><span class="header-section-number">7.6</span> Write NIfTI</h2>
+<div class="sourceCode" id="cb128"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb128-1"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb128-1"></a>fname =<span class="st"> </span><span class="kw">paste0</span>(<span class="st">&quot;bet2-&quot;</span>,fname)</span>
+<span id="cb128-2"><a href="skull-stripping-with-fsls-brain-extraction-tool-bet.html#cb128-2"></a><span class="kw">suppressMessages</span>(oro.nifti<span class="op">::</span><span class="kw">writeNIfTI</span>(bet_fast2, <span class="kw">file.path</span>(fpath, fname)))</span></code></pre></div>
+
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="inhomogeneitybias-field-correction.html" class="navigation navigation-prev " aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+<a href="registration-to-a-template-spatial-normalization.html" class="navigation navigation-next " aria-label="Next page"><i class="fa fa-angle-right"></i></a>
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": null,
+"text": null
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": null,
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+</body>
+
+</html>
